@@ -33,8 +33,8 @@ async function makeCommitsForDateRange(startDate, endDate, commits) {
 }
 
 // Usage example
-const startDate = new Date('2023-02-18T12:00:00Z');
-const endDate = new Date('2023-02-20T12:00:00Z');
+const startDate = new Date('2022-02-21T12:00:00Z');
+const endDate = new Date('2023-10-21T12:00:00Z');
 const commits = [
   'Created paypal logic',
   'Created store',
