@@ -1,13 +1,15 @@
-import { Stripe } from "./Stripe";
+import { Paypal } from "./Paypal";
 
 export class Store {
-  stripe: Stripe
+  user: any
+  paypal: Paypal
 
   constructor(user: any) {
-    this.stripe = new Stripe(user)
+    this.user = user
+    this.paypal = new Paypal()
   }
 
   purchase(quality: number) {
-    this.stripe.pay(15 * quality)
+    this.paypal.pay(this.user, 15 * quality * 100)
   }
 }
