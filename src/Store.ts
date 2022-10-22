@@ -1,13 +1,12 @@
-import { Stripe } from "./Stripe";
+import { PaymentProcessor } from "./PaymentProcessor";
 
 export class Store {
-  stripe: Stripe
-
-  constructor(user: any) {
-    this.stripe = new Stripe(user)
+  paymentProcessor: PaymentProcessor
+  constructor(paymentProcessor: PaymentProcessor) {
+    this.paymentProcessor = paymentProcessor
   }
 
   purchase(quality: number) {
-    this.stripe.pay(15 * quality)
+    this.paymentProcessor.pay(15 * quality)
   }
 }
