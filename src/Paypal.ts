@@ -1,11 +1,5 @@
 export class Paypal {
-	user: any
-
-  constructor(user: any) {
-		this.user = user
-	}
-
-	pay(amount: number) {
-		console.log(`${this.user} make payment of $${amount} with paypal`)
+	pay(user: any, amountInCents: number) {
+		console.log(`${user} make payment of $${amountInCents} cents with paypal`)
 	}
 }
