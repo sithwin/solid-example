@@ -1,14 +1,22 @@
-import * as mongodb from 'mongodb';
+class MongoDBService<T extends Entity> {
+  private connection: string;
 
-class MongoDBService<T extends Entity> implements DatabaseService<T> {
-  async save(entity: T): Promise<void> {
-    console.log(`Saving entity with id: ${entity.id}`);
-    // Implementation to save to MongoDB...
+  constructor(private collectionName: string) {
+    this.connection = `mongodb://localhost/${collectionName}`;
   }
 
-  async getById(id: string): Promise<T> {
-    console.log(`Retrieving entity with id: ${id}`);
-    // Implementation to retrieve from MongoDB...
-    return {} as T;
+  async saveEntity(entity: T, paySummary: PaySummary): Promise<void> {
+    const client = await MongoClient.connect(this.connection);
+    const db = client.db();
+    const collection = db.collection(this.collectionName);
+
+    const document = {
+      id: entity.id,
+      paySummary: paySummary,
+      // Include any other properties you want to save here
+    };
+
+    await collection.insertOne(document);
+    await client.close();
   }
 }

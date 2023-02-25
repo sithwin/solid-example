@@ -1,69 +1,82 @@
 import * as mongodb from 'mongodb';
 
-type EmployeeType = 'fullTime' | 'partTime' | 'contractor';
-
 interface Employee {
-  type: EmployeeType;
-  hourlyRate: number;
-  hoursWorked: number;
-  salary: number;
+  calculatePay(): number;
+  reportHours(): void;
+  save(): Promise<void>;
 }
 
-class PayCalculator {
-  static calculatePay(employee: Employee): number {
-    switch (employee.type) {
-      case 'fullTime':
-        return employee.salary;
-      case 'partTime':
-      case 'contractor':
-        return employee.hourlyRate * employee.hoursWorked;
-      default:
-        throw new Error('Invalid employee type.');
-    }
+class FullTimeEmployee implements Employee {
+  constructor(private salary: number) {}
+
+  calculatePay(): number {
+    return this.salary;
   }
 
-  static reportHours(employee: Employee): void {
-    switch (employee.type) {
-      case 'fullTime':
-        console.log('Full-time employee does not report hours.');
-        break;
-      case 'partTime':
-      case 'contractor':
-        console.log(`Hours worked: ${employee.hoursWorked}`);
-        break;
-      default:
-        throw new Error('Invalid employee type.');
-    }
+  reportHours(): void {
+    console.log('Full-time employee does not report hours.');
   }
 
-  static async save(employee: Employee): Promise<void> {
+  async save(): Promise<void> {
     const client = await mongodb.MongoClient.connect('mongodb://localhost:27017', { useUnifiedTopology: true });
     const db = client.db('mydb');
-    await db.collection('employees').insertOne(employee);
+    await db.collection('employees').insertOne({ type: 'fullTime', salary: this.salary });
+    await client.close();
+  }
+}
+
+class PartTimeEmployee implements Employee {
+  constructor(private hourlyRate: number, private hoursWorked: number) {}
+
+  calculatePay(): number {
+    return this.hourlyRate * this.hoursWorked;
+  }
+
+  reportHours(): void {
+    console.log(`Hours worked: ${this.hoursWorked}`);
+  }
+
+  async save(): Promise<void> {
+    const client = await mongodb.MongoClient.connect('mongodb://localhost:27017', { useUnifiedTopology: true });
+    const db = client.db('mydb');
+    await db.collection('employees').insertOne({ type: 'partTime', hourlyRate: this.hourlyRate, hoursWorked: this.hoursWorked });
+    await client.close();
+  }
+}
+
+class ContractorEmployee implements Employee {
+  constructor(private hourlyRate: number, private hoursWorked: number) {}
+
+  calculatePay(): number {
+    return this.hourlyRate * this.hoursWorked;
+  }
+
+  reportHours(): void {
+    console.log(`Hours worked: ${this.hoursWorked}`);
+  }
+
+  async save(): Promise<void> {
+    const client = await mongodb.MongoClient.connect('mongodb://localhost:27017', { useUnifiedTopology: true });
+    const db = client.db('mydb');
+    await db.collection('employees').insertOne({ type: 'contractor', hourlyRate: this.hourlyRate, hoursWorked: this.hoursWorked });
     await client.close();
   }
 }
 
 // Example usage
-const fullTimeEmployee: Employee = {
-  type: 'fullTime',
-  hourlyRate: 0,
-  hoursWorked: 0,
-  salary: 60000,
-};
-const partTimeEmployee: Employee = {
-  type: 'partTime',
-  hourlyRate: 25,
-  hoursWorked: 20,
-  salary: 0,
-};
-const contractorEmployee: Employee = {
-  type: 'contractor',
-  hourlyRate: 50,
-  hoursWorked: 10,
-  salary: 0,
-};
+const fullTimeEmployee: Employee = new FullTimeEmployee(60000);
+const partTimeEmployee: Employee = new PartTimeEmployee(25, 20);
+const contractorEmployee: Employee = new ContractorEmployee(50, 10);
 
-PayCalculator.save(fullTimeEmployee);
-PayCalculator.save(partTimeEmployee);
-PayCalculator.save(contractorEmployee);
+const employees: Employee[] = [fullTimeEmployee, partTimeEmployee, contractorEmployee];
+
+async function processEmployees(): Promise<void> {
+  for (const employee of employees) {
+    const pay = employee.calculatePay();
+    console.log(`Pay: ${pay}`);
+    employee.reportHours();
+    await employee.save();
+  }
+}
+
+processEmployees();
